@@ -6,9 +6,7 @@ import java.util.Map;
 
 import com.serjer.playground.common.PlaySiteItem;
 
-import lombok.Data;
 
-@Data
 public class KidHistoryData {
 	
 	private int ticketNo;
@@ -22,6 +20,18 @@ public class KidHistoryData {
 	 
 	 public KidHistoryData(int ticketNo) {
 	        this.ticketNo = ticketNo;
+	    }
+	 
+	 public KidInfo getKidInfo() {
+	        return kidInfo;
+	    }
+
+	    public Map<PlaySiteItem, List<HistoryData>> getHistoryDataMap() {
+	        return historyDataMap;
+	    }
+
+	    public int getTicketNo() {
+	        return ticketNo;
 	    }
 
 	@Override
