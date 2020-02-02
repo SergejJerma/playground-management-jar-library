@@ -4,16 +4,12 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.IntStream;
-
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.serjer.playground.common.PlaySiteItem;
 import com.serjer.playground.service.utilization.DefaultUtilizationService;
 import com.serjer.playground.service.utilization.IUtilization;
-
-
 
 public class PlaySites {
 	
@@ -82,15 +78,15 @@ public class PlaySites {
 
             this.playSiteName = playSiteItem;
             this.capacityOfEachPlaySite = capacityOfEachPlaySite;
-
-            IntStream.of(numberOfItems)
-                    .forEach(item -> {
-                        String name = playSiteName.name().concat("_").concat(String.valueOf(item));
-
+           
+            
+            for (int i = 1; i <= numberOfItems; i++) {
+                        String name = playSiteName.name().concat("_").concat(String.valueOf(i));
+                       
                         PlaySiteInfo playSiteInfo = new PlaySiteInfo(name, new LinkedBlockingQueue<>(capacityOfEachPlaySite));
                         this.maxQueueSize = capacityOfEachPlaySite;
                         playSitesAvailable.add(playSiteInfo);
-                    });
+                    }
 
             return this;
         }
