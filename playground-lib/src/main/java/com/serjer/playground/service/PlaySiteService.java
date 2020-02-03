@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.serjer.playground.common.PlaySiteItem;
@@ -24,7 +25,7 @@ import com.serjer.playground.model.PlaySiteInfo;
 import com.serjer.playground.model.PlaySites;
 import com.serjer.playground.service.validation.PlaySiteValidateService;
 
-
+@Service
 public class PlaySiteService {
 	
 
