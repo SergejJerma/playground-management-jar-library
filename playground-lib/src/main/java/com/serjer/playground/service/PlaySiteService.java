@@ -27,7 +27,8 @@ import com.serjer.playground.service.validation.PlaySiteValidateService;
 
 public class PlaySiteService {
 	
-	 private final static Logger LOGGER = LoggerFactory.getLogger(PlaySiteService.class);
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(PlaySiteService.class);
 
 	    private static Map<PlaySiteItem, PlaySites> playSitesMap = new HashMap<>();
 	    private final PlaySiteValidateService playSiteValidateService;
@@ -50,25 +51,26 @@ public class PlaySiteService {
 	    /**
 	     * Throws NotFoundException if play list info is not found
 	     */
-	    public PlaySites getPlaySitesInfo(PlaySiteItem playSiteItem) {
 
-	        if (playSitesMap.containsKey(playSiteItem)) {
-	            return playSitesMap.get(playSiteItem);
-	        } else {
-	            throw new NotFoundException("PlaySite Info not found");
-	        }
+	    public PlaySites getPlaySitesInfo(PlaySiteItem playSiteItem) {
+	    	
+	    	if (playSitesMap.containsKey(playSiteItem)) 
+	    		return playSitesMap.get(playSiteItem);
+	    	else 
+	    		throw new NotFoundException("PlaySite Info not found");
 	    }
 
 	    /**
 	     * Throws IllegalArgumentException if playsite builder sis not found
 	     */
+	    
 	    public PlaySiteService registerPlaySite(final PlaySites.PlaySitesBuilder playSitesBuilder) {
-	        Assert.notNull(playSitesBuilder, "Builder cannot be null");
-	    //    for (int i = 1; i <= playSitesBuilder.getPlaySitesAvailable().size() MANO IDETAS
-	        PlaySites playSites = playSitesBuilder.build();
-	        playSitesMap.put(playSites.getPlaySiteName(), playSites);
-	        LOGGER.info("Play site {} registered", playSites.getPlaySiteName());
-	        return this;
+	    	Assert.notNull(playSitesBuilder, "Builder cann't be null");
+	    	
+	    	PlaySites playSites = playSitesBuilder.build();
+	    	playSitesMap.put(playSites.getPlaySiteName(), playSites);
+	    	LOGGER.info("Play site {} registered", playSites.getPlaySiteName());
+	    	return this;
 	    }
 
 	    /*
@@ -78,7 +80,7 @@ public class PlaySiteService {
 	     */
 	    boolean addKidToPlaySite(final PlaySites playSites, final KidInfo kidInfo) {
 
-	        if (!playSiteValidateService.canAddKidToPlaySite(playSites, kidInfo)) {
+	         if (!playSiteValidateService.canAddKidToPlaySite(playSites, kidInfo)) {
 	            throw new PlaySiteItemFullException("Play site is already filled");
 	        }
 
@@ -88,18 +90,18 @@ public class PlaySiteService {
 
 	        synchronized (playSites.getPlaySiteName()) {
 
-	            Optional<PlaySiteInfo> playSiteItemWithSpace = playSites.getPlaySitesAvailable()
+	            Optional<PlaySiteInfo> playSiteItemWithFreePlases = playSites.getPlaySitesAvailable()
 	                    .stream()
 	                    .filter(playSiteInfo -> playSiteInfo.getKidInfoSet().size() < playSites.getCapacityOfEachPlaySite())
 	                    .findAny();
 
-	            if (playSiteItemWithSpace.isPresent() && !kidInfo.isVip()) {
-	                PlaySiteInfo playSiteInfo = playSiteItemWithSpace.get();
+	            if (playSiteItemWithFreePlases.isPresent() && !kidInfo.isVip()) {
+	                PlaySiteInfo playSiteInfo = playSiteItemWithFreePlases.get();
 	                playSiteInfo.getKidInfoSet().add(kidInfo);
 
-	            } else if (playSiteItemWithSpace.isPresent() && kidInfo.isVip()) {
+	            } else if (playSiteItemWithFreePlases.isPresent() && kidInfo.isVip()) {
 
-	                reorderQueueForVip(kidInfo, playSiteItemWithSpace);
+	                reorderQueueForVip(kidInfo, playSiteItemWithFreePlases);
 
 	            } else {
 
@@ -119,46 +121,37 @@ public class PlaySiteService {
 
 	        kidInfoSet.clear();
 
-	        Integer vipIndex = null;
+	        Integer lastVipIndex = null;
 
-	        /*
-	         * We should check whether vip is existing anywhere in the queue.
-	         * So going back from queue, will help us to add 3 indexes after the last vip present.
-	         */
-	        for (int index = queueList.size() - 1; index > -1; index--) {
+	    	        for (int index = queueList.size() - 1; index > -1; index--) {
 	            KidInfo kidInfo1 = queueList.get(index);
 
 	            if (kidInfo1.isVip()) {
-	                vipIndex = index;
+	                lastVipIndex = index;
 	                break;
 	            }
 	        }
 
-	        //No vip is present
-	        if (vipIndex == null) {
+	    	if (lastVipIndex == null) {
 
 	            kidInfoSet.add(kidInfo);
 	            kidInfoSet.addAll(queueList);
 
-	        } else if (vipIndex + 3 >= queueList.size() - 1) { //If vip is there by the end of queue
+	        } else if (lastVipIndex == queueList.size() - 1 || lastVipIndex <= queueList.size() - 2) { 
 	            kidInfoSet.addAll(queueList);
 	            kidInfoSet.add(kidInfo);
 
 	        } else {
 
 	            AtomicInteger index = new AtomicInteger(0);
-	            AtomicInteger vipIndexWrapped = new AtomicInteger(vipIndex);
+	            AtomicInteger vipIndexWrapped = new AtomicInteger(lastVipIndex + 4);
 
 	            queueList.forEach(kidInfo1 -> {
 
-	                if (index.get() < vipIndexWrapped.get() || index.get() > vipIndexWrapped.get()) {
-
+	                if (index.get() != vipIndexWrapped.get()) 
 	                    kidInfoSet.add(kidInfo1);
-
-	                } else if (index.get() == vipIndexWrapped.get()) {
-
+	                else  
 	                    kidInfoSet.add(kidInfo);
-	                }
 
 	                index.getAndIncrement();
 	            });
